@@ -32,68 +32,55 @@
 (def routes (atom {}))
 
 (defn my-screen []
-  "In this screen we use the reagent current-component component function insted of this-as this"
-           (let [nav (.. (r/current-component) -props -navigation)]
-           (swap! routes assoc :my-screen nav)
              [view [touchable-highlight {:style {:background-color "#999" :padding 10 :border-radius 5}
-                                         :on-press #(.navigate nav "Second")
+                                         :on-press #(.navigate (get @routes "Welcome") "Second")
                                    ;#(.. nav (dispatch gotosec)) ;second way
 }
-                    [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "Press Me"]]]))
+                    [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "Press Me"]]])
 
 (defn second-screen []
-  "In this screen the navigation props is imported with this-as this"
-  (this-as this
-           (let [nav (.. this -props -navigation)]
-                (swap! routes assoc :second nav)
              [view [touchable-highlight {:style {:background-color "#999" :padding 10 :border-radius 5}
                                          :on-press
-                                         #(.navigate (get @routes :main) "Chat")}
-                    [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "Second"]]])))
+                                         #(.navigate (get @routes "Main") "Chat")}
+                    [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "Second"]]])
 
-(defn chat-screen [{:keys [navigation]}]
-  "In this screen the navigation props is passed as a key"
-           (swap! routes assoc :chat nav)
+(defn chat-screen []
              [view [touchable-highlight {:style {:background-color "#999" :padding 10 :border-radius 5}
-                                         :on-press  #(.navigate navigation "Prova")}
+                                         :on-press  #(.navigate (get @routes "chat") "Prova")}
                     [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "Go back"]]])
 
 
-(defn prova-screen [{:keys [navigation]}]
-             (swap! routes assoc :prova navigation)
+(defn prova-screen []
              [view [touchable-highlight {:style {:background-color "#999" :padding 10 :border-radius 5}
-                                         :on-press #(.navigate navigation "Chat")}
+                                         :on-press #(.navigate (get @routes "Prova") "Chat")}
                     [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "Prova"]]])
 
 
-  (defn wrapper
-   "Convert the reagent component into a normal react component and
-   Set the navigationOptions into the component."
-   [screen title]
-   (let [reactscreen (r/reactify-component screen)]
-     (aset reactscreen "navigationOptions" (clj->js {:title title})) reactscreen))
+(defn wrapper-prova
+ "Convert the reagent component into a normal react component and
+ Set the navigationOptions onto the component.
+ Moreover add the navigation props at the component and save it into the routes atom"
+ [screen title ]
+ (let [reactscreen (r/reactify-component  (fn [{:keys [navigation]}] [screen (swap! routes assoc title navigation)]) )]
+ (aset reactscreen "navigationOptions" (clj->js {:title title}))
+    reactscreen))
 
 
-
-(defn main-screen [{:keys [navigation]}]
-    (swap! routes assoc :main navigation)
+(defn main-screen []
   (r/create-element (Stack-navigator (clj->js {:MyScreen {:screen MyScreen}
                                                :Second {:screen SecondScreen}})
-                            ;use this options if you have 2 nested tabnavigator                    
-                                   ;(clj->js {:swipeEnabled false :animationEnabled false
-                                              ;:navigationOptions {:tabBarVisible false}})
+                                   ;(clj->js {:swipeEnabled false :animationEnabled false :navigationOptions {:tabBarVisible false}}); con il tab per far montare le componenti
                                   (clj->js  {:navigationOptions {:header null}
                                             :cardstyle {:backgroundColor "white"}
                                             :transitionConfig (fn [] #js {:screenInterpolator (.-forHorizontal (.-default cardstyle))})}) ;per lo stack per far muovere orizzontalmente
                                   ;(clj->js {:navigationOptions {:header null}})
                                   )))
 
-
-(def MainScreen (wrapper main-screen "Main"))
-(def MyScreen (wrapper my-screen "Welcome"))
-(def ChatScreen (wrapper chat-screen "chat"))
-(def SecondScreen (wrapper second-screen "Second"))
-(def ProvaScreen (wrapper prova-screen "Prova"))
+(def MainScreen (wrapper-prova main-screen "Main"))
+(def MyScreen (wrapper-prova my-screen "Welcome"))
+(def ChatScreen (wrapper-prova chat-screen "chat"))
+(def SecondScreen (wrapper-prova second-screen "Second"))
+(def ProvaScreen (wrapper-prova prova-screen "Prova"))
 
 (defn app-root []
   "  With :tabBarVisible false I decided to hide the header
