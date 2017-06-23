@@ -1,0 +1,24 @@
+{
+  "name": "navigation",
+  "interface": "reagent6",
+  "envRoots": {
+    "dev": "env/dev",
+    "prod": "env/prod"
+  },
+  "modules": [
+    "react-navigation"
+  ],
+  "imageDirs": [
+    "images"
+  ],
+  "platforms": {
+    "ios": {
+      "host": "localhost",
+      "modules": []
+    },
+    "android": {
+      "host": "10.0.3.2",
+      "modules": []
+    }
+  }
+}
